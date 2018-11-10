@@ -13,21 +13,24 @@ class CalcController {
         setInterval(() => {
             this.setDisplayDateTime();
         }, 1000);
+        this.initButtonsEvents();
 
         /* setTimeout(()=>{
             clearInterval(interval);
         }, 10000); */
     }
 
-    setDisplayDateTime(){ // Insere data e hora atual no display
-        this.displayDate = this.currentDate().toLocaleDateString(this._locale, {
-            day : "2-digit",
-            month : "short",
-            year: "numeric"
-        });
-        this.displayTime = this.currentDate().toLocaleTimeString(this._locale);
+    initButtonsEvents(){ // EVENTOS DOS BOTOES
+         let buttons = document.querySelectorAll("#buttons > g, #parts > g"); // Capturando botoes
+
+         buttons.forEach((btn, index) =>{
+             this.buttonEvents(btn,"click");
+             this.buttonEvents(btn,"drag");
+         })
     }
 
+    
+    // GETTERS AND SETTERS
 
     get displayDate() { // Captura data no display
         return this._dateCalcEl.innerHTML;
@@ -57,8 +60,25 @@ class CalcController {
         this._displayCalcEl.innerHTML = valor;
     }
 
+    // METHODS
+
+    buttonEvents(btn,event){
+        btn.addEventListener(event,e=>{
+            console.log(btn.className.baseVal.replace("btn-",""));
+         });
+    }
+
     currentDate() { // Captura data atual
         return new Date();
+    }
+
+    setDisplayDateTime(){ // Insere data e hora atual no display
+        this.displayDate = this.currentDate().toLocaleDateString(this._locale, {
+            day : "2-digit",
+            month : "short",
+            year: "numeric"
+        });
+        this.displayTime = this.currentDate().toLocaleTimeString(this._locale);
     }
 
 }
