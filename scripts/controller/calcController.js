@@ -10,10 +10,11 @@ class CalcController {
     }
 
     initialize() {
-        this.displayCalc = 0;
+        this.displayCalc = "0";
         this.currentLocale = navigator.language;
         this.setDisplayDateTime();
         this.updateDisplayDateTime();
+        this.setLastNumbertoDisplay();
         this.initButtonsEvents();
     }
 
@@ -31,6 +32,7 @@ class CalcController {
             // MUDANDO CURSOR EM AREAS CLICAVEIS
             this.addEventListenerAll(btn, "mouseover mouseup mousedown", e => {
                 btn.style.cursor = "pointer";
+                
             });
         })
     }
@@ -118,7 +120,7 @@ class CalcController {
                 break;
 
             case 'igual':
-
+                this.calc();
                 break;
 
             case 'ponto':
@@ -152,20 +154,27 @@ class CalcController {
                 //Trocar o operador
                 this.setLastOperation(value);
             } else if (isNaN(value)) {
-                // Outra coisa
-                console.log(value);
+                // Outra coisa (Ponto)
+                let new_value = this.getLastOperation().toString() + value;
+                this.setLastOperation(parseInt(new_value));
+                //atualizar display
+                this.setLastNumbertoDisplay();
             } else {
                 // É um numero
-                this._operation.push(value);
+                this.pushOperation(value);
+                this.setLastNumbertoDisplay();
             }
 
         } else {
             // Ultima operação é Numero
             if (this.isOperator(value)) {
-                this._operation.push(value);
+                this.pushOperation(value);
             } else {
                 let new_value = this.getLastOperation().toString() + value.toString();
                 this.setLastOperation(parseInt(new_value));
+
+                //atualizar display
+                this.setLastNumbertoDisplay();
             }
 
         }
@@ -181,15 +190,57 @@ class CalcController {
         }, 10000); */
     }
 
+    setLastNumbertoDisplay() {
+
+        let lastNumber;
+
+        for (let i = this._operation.length - 1; i >= 0; i--) {
+            if (!this.isOperator(this._operation[i])) {
+                lastNumber = this._operation[i];
+                break;
+            }
+        }
+
+        if (!lastNumber) lastNumber = 0;
+        this.displayCalc = lastNumber;
+    }
+
     isOperator(value) {
         return (['+', '-', '*', '%', '/'].indexOf(value) > -1);
-
     }
+
 
     clearAll() {
         this._operation = []; // ZERA O ARRAY
+        this.setLastNumbertoDisplay();
     }
 
+    pushOperation(value) {
+        this._operation.push(value);
+        if (this._operation.length > 3) {
+            this.calc();
+            console.log(this._operation);
+        }
+    }
+
+    calc() {
+        if (isNaN(this.getLastOperation())) {
+            let last = this._operation.pop();
+            let result = eval(this._operation.join(""));
+            if (last == "%") {
+                result /= 100;
+                this._operation = [result];
+            } else {
+                this._operation = [result, last];
+            }
+        } else {
+            let result = eval(this._operation.join(""));
+            this._operation = [result];
+        }
+
+        this.setLastNumbertoDisplay();
+    }
+    
     getLastOperation() { // PEGA O ULTIMO ITEM DO ARRAY
         return this._operation[this._operation.length - 1];
     }
@@ -200,6 +251,7 @@ class CalcController {
 
     clearEntry() {
         this._operation.pop(); // DELETA ULTIMO ITEM DO ARRAY
+        this.setLastNumbertoDisplay();
     }
 
     setError() {
